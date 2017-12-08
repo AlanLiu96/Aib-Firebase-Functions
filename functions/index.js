@@ -33,7 +33,7 @@ function setObjectData(objectId, name, email, kioskNumber) {
   admin.database().ref('/kiosk/' + parseInt(kioskNumber)).set({}); // reset kiosk
 }
 
-// POST REQUEST FOR USER INFORMATION ENTRY
+// GET REQUEST FOR USER INFORMATION ENTRY
 exports.userInfo = functions.https.onRequest((req, res) => {
     const kioskNumber = req.query.kiosk_number;
     const name = req.query.name;
@@ -50,8 +50,21 @@ exports.userInfo = functions.https.onRequest((req, res) => {
     return res.status(201).send("Name and Email Created");
 });
 
-
-
+// GET REQUEST for EXHIBIT ORB IDENTIFICATION
+// Checks if the orb is ready to be dispensed 
+exports.getNames = functions.https.onRequest((req, res) => {
+    admin.database().ref('/object').once('value').then(function(snapshot) {
+      names = [];
+      emails = [];
+      snapshot.forEach(function(child) {
+        if (child.val().location == "FuturePod"){
+          names.push(child.val().name);
+          emails.push(child.val().email);
+        }
+      });
+      return res.status(200).send(names.join(',') + '\t' + emails.join(','));
+  });
+});
 
 
 /*
