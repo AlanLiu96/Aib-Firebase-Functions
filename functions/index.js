@@ -23,6 +23,11 @@ exports.checkReady = functions.https.onRequest((req, res) => {
 });
 
 function setObjectData(objectId, name, email, kioskNumber) {
+  admin.database().ref('/object' + objectId).once('value').then(function(snapshot) {
+    if (snapshot.val().email){
+      clearObject(snapshot.val().name, snapshot.val().email, snapshot.val().visited, snapshot.val().video, objectId);
+    }
+    });
   admin.database().ref('object/' + objectId).set({ // set object and prepare it 
     name: name,
     email: email,
@@ -66,6 +71,14 @@ exports.getNames = functions.https.onRequest((req, res) => {
   });
 });
 
+function clearObject(name, email, visited, video, objectId){
+  admin.database().ref('/visitorLog/' + email).set({ // set visitorLog
+    name: name,
+    visited: visited,
+    video: video
+  });
+  admin.database().ref('/object/' + objectId).set({}); // reset object to default
+}
 
 /*
 
