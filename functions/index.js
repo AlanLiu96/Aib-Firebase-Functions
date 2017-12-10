@@ -58,11 +58,14 @@ exports.userInfo = functions.https.onRequest((req, res) => {
 // GET REQUEST for EXHIBIT ORB IDENTIFICATION
 // Checks if the orb is ready to be dispensed 
 exports.getNames = functions.https.onRequest((req, res) => {
+  const location = req.query.location; // should be either "FuturePod" or "Mirror"
+  if (!location)
+    return res.status(400).send("Bad request: Expected a query parameter with location: FuturePod or Mirror");
     admin.database().ref('/object').once('value').then(function(snapshot) {
       names = [];
       emails = [];
       snapshot.forEach(function(child) {
-        if (child.val().location == "FuturePod"){
+        if (child.val().location == location){
           names.push(child.val().name);
           emails.push(child.val().email);
         }
