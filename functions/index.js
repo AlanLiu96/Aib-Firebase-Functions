@@ -47,6 +47,15 @@ exports.userInfo = functions.https.onRequest((req, res) => {
     	res.status(400).send("Invalid Arguments, expected kiosk_number, name, email in request, got" + kioskNumber + name + email);
     }
 
+    admin.database().ref('/kiosk/' + parseInt(kioskNumber)).once('value').then(function(snapshot) {
+      if (snapshot.val().name){
+        var savedInfo = {};
+        savedInfo['/savedInfo/'+ snapshot.val().name + '/name'] = name;
+        savedInfo['/savedInfo/'+ snapshot.val().name + '/email'] = email;
+        admin.database().ref().update(savedInfo);
+      }
+    });
+
     var updates = {};
   	updates['/kiosk/' + parseInt(kioskNumber) + '/name'] = name;
   	updates['/kiosk/' + parseInt(kioskNumber) + '/email'] = email;
@@ -75,7 +84,7 @@ exports.getNames = functions.https.onRequest((req, res) => {
 });
 
 function clearObject(name, email, visited, video, objectId){
-  admin.database().ref('/visitorLog/' + email).set({ // set visitorLog
+  admin.database().ref('/visitorLog/' + name).set({ // set visitorLog
     name: name,
     visited: visited,
     video: video
